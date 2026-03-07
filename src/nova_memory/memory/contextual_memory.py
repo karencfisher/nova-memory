@@ -47,9 +47,9 @@ class ContextualMemory:
 
         return [
             Memory(
-                text=item['m.text'],
-                kind=item['m.kind'],
-                metadata=json.loads(item['m.meta_json'])
+                text=item['text'],
+                kind=item['kind'],
+                metadata=json.loads(item['meta_json'])
             )
             for item in result['data']
         ]

@@ -22,14 +22,12 @@ AND evicted = 0;
 
     @classmethod
     def add_message(cls, conv_id: int, message: dict) -> dict:
-        message_dict = json.loads(message)
-
-        role = message_dict['role']
-        if role == 'user' and isinstance(message_dict['content'], dict):
-            content = message_dict['content']['text']
-            meta_json = json.dumps(message_dict['content']['metadata'])
+        role = message['role']
+        if role == 'user' and isinstance(message['content'], dict):
+            content = message['content']['text']
+            meta_json = json.dumps(message['content']['metadata'])
         else:
-            content = message_dict['content']
+            content = message['content']
             meta_json = None
 
         sql = f'''
