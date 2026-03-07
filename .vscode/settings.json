@@ -1,0 +1,4 @@
+{
+    "vscode-corda.isCordaProject": false,
+    "python.analysis.extraPaths": ["./src"]
+}

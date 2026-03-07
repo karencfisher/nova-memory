@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "novadb"
+version = "0.1.0"
+description = "Nova DB + repositories"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "platformdirs==4.9.2",
+  "sentence-transformers==3.4.0",
+  "sqliteai-vector==0.9.92",
+]
+
+[project.scripts]
+nova-init-db = "nova_memory._db.db.migrate:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
