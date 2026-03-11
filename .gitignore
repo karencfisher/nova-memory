@@ -1,3 +1,14 @@
 __pycache__/
 .cache/
 *.db
+*.egg-info/
+
+*.py[cod]
+
+# virtual environments
+.venv/
+venv/
+
+.vscode/
+.idea/
+

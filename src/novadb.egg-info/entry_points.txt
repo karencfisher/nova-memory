@@ -1,2 +1,0 @@
-[console_scripts]
-nova-init-db = nova_memory._db.db.migrate:main
