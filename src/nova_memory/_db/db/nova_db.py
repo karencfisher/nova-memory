@@ -1,21 +1,17 @@
 from contextlib import contextmanager
 import sqlite3
 import importlib.resources
-from pathlib import Path
 
 from ..util.db_path_config import read_db_path
 
 class NovaDB:
-    def __init__(self, db=None):
-        if db is None:
-            db = read_db_path()
-            if db is None:
-                raise NotImplemented('Database not initialized')
+    def __init__(self):
+        db = read_db_path()
         self.db_path = db
         self.ext_path = importlib.resources.files("sqlite_vector.binaries") / "vector"
 
     @contextmanager
-    def _conn(self, use_vectors=False):
+    def _conn(self, use_vectors=False, distance='COSINE'):
         conn = sqlite3.connect(self.db_path)  # default check_same_thread=True is fine here
         try:
             conn.execute("PRAGMA foreign_keys = ON;")
@@ -26,8 +22,11 @@ class NovaDB:
                 conn.enable_load_extension(True)
                 conn.load_extension(str(self.ext_path))
                 conn.enable_load_extension(False)
+                
+                opts = f"distance={distance},type=FLOAT32,dimension=384"
                 conn.execute(
-                    "SELECT vector_init('memory_items', 'embedding', 'type=FLOAT32, dimension=384')"
+                    "SELECT vector_init('memory_items', 'embedding', ?)",
+                    (opts,)
                 )
 
             yield conn
@@ -39,14 +38,16 @@ class NovaDB:
             conn.close()
 
     def execute_sql(self, sql_batch, params=None, returns_data=False, 
-                    use_vectors=False):
+                    use_vectors=False, distance='COSINE'):
+        if self.db_path is None:
+            raise NotImplementedError('DB has not been initialized')
         if not isinstance(sql_batch, list):
             sql_batch = [(sql_batch, params)]
 
         data = []
         error = None
 
-        with self._conn(use_vectors=use_vectors) as CONN:
+        with self._conn(use_vectors=use_vectors, distance=distance) as CONN:
             CONN.row_factory = sqlite3.Row
             cursor = CONN.cursor()
 

@@ -22,12 +22,19 @@ AND evicted = 0;
 
     @classmethod
     def add_message(cls, conv_id: int, message: dict) -> dict:
-        role = message['role']
-        if role == 'user' and isinstance(message['content'], dict):
-            content = message['content']['text']
-            meta_json = json.dumps(message['content']['metadata'])
-        else:
+        try:
+            role = message['role']
             content = message['content']
+        except KeyError:
+            return {'error': 'Invalid message', 'data': []}
+        
+        if role == 'user' and isinstance(content, dict):
+            try:
+                meta_json = json.dumps(content['metadata'])
+                content = content['text']
+            except KeyError:
+                return {'error': 'Invalid metadata', 'data': []}
+        else:
             meta_json = None
 
         sql = f'''
@@ -39,6 +46,9 @@ VALUES (?, ?, ?, ?);
 
     @classmethod
     def evict_messages(cls, conv_id: int, count: int) -> dict:
+        if count == 0:
+            return {'error': None, 'data': []}
+        
         sql = f'''
 UPDATE messages
 SET evicted = 1

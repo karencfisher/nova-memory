@@ -4,7 +4,7 @@ from ..db.nova_db import NovaDB
 
 
 class ConversationsRepository:
-    dbn = NovaDB
+    dbn = NovaDB()
    
     @classmethod
     def get_conversations(cls) -> dict:
@@ -19,8 +19,7 @@ ORDER BY id DESC;
     def add_conversation(cls, title: str) -> dict:
         sql = f'''
 INSERT INTO conversations (title)
-VALUES (?)
-SELECT last_insert_rowid AS new_id;
+VALUES (?);
 '''
         params = (title,)
         return cls.dbn.execute_sql(sql, params)
@@ -30,7 +29,7 @@ SELECT last_insert_rowid AS new_id;
         sql = f'''
 UPDATE conversations
 SET deleted = 1
-WHERE ?
+WHERE id = ?
 '''
         params = (id,)
         return cls.dbn.execute_sql(sql, params)
@@ -40,7 +39,7 @@ WHERE ?
         sql = f'''
 UPDATE conversations
 SET deleted = 0
-WHERE ?
+WHERE id = ?
 '''
         params = (id,)
         return cls.dbn.execute_sql(sql, params)

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field, replace
-from typing import Dict
+from typing import Dict, Any
 import json
 
 
@@ -9,9 +9,12 @@ from .._db.repositories.contextual_memory_repo import ContextualMemoryRepository
 @dataclass
 class Memory:
     text: str
-    metadata: Dict = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)
     kind: str = 'note'
-    token_count: int = len(text.split())
+
+    @property
+    def token_count(self) -> int:
+        return len(self.text.split())
     
 
 class ContextualMemory:
@@ -19,6 +22,12 @@ class ContextualMemory:
         self.max_chunk = max_chunk
         self.overlap = overlap
         self._contextual_memory_repo = ContextualMemoryRepository
+        
+    def init_memory(self, distance='COSINE'):
+        options = ['L1', 'COSINE', 'DOT', 'SQUARED_L2', 'L2']
+        if not distance in options:
+            raise ValueError(f'Distance must be of {options}')
+        self._contextual_memory_repo.init_memory(distance=distance)
        
     def add_memory(self, memory: Memory | tuple[Memory, ...], preprocessed: bool=False) -> None:
         memories = memory if isinstance(memory, tuple) else (memory,)
@@ -26,7 +35,7 @@ class ContextualMemory:
             raise TypeError('Memory items need to be instance of the Memory class')
         
         if not preprocessed:
-            memories = self._process(memories, preprocessed)
+            memories = self._process(memories)
         
         for item in memories:
             result = self._contextual_memory_repo.add_memory(
@@ -37,7 +46,7 @@ class ContextualMemory:
             if result['error'] is not None:
                 raise Exception(result['error'])
     
-    def query_memories(self, query: str, k: int = 5, kind: str = 'note') -> list[Memory]:
+    def query_memories(self, query: str, k: int = 5, kind: str = 'note') -> dict:
         result = self._contextual_memory_repo.retrieve_memories(
             query, k=k, kind=kind
         )
@@ -45,12 +54,14 @@ class ContextualMemory:
         if result['error'] is not None:
             raise Exception(result['error'])
 
-        return [
-            Memory(
+        return [{
+            'data': Memory(
                 text=item['text'],
                 kind=item['kind'],
                 metadata=json.loads(item['meta_json'])
-            )
+            ),
+            'distance': item['distance']
+        } 
             for item in result['data']
         ]
         

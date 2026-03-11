@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: nova-memory
+Version: 0.1.0
+Summary: Nova DB + repositories
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: platformdirs==4.9.2
+Requires-Dist: sentence-transformers==3.4.0
+Requires-Dist: sqliteai-vector==0.9.92

@@ -1,12 +1,14 @@
 import json
+from collections.abc import Callable
+from typing import Any
 
 from .._db.repositories.chat_memory_repo import ChatMemoryRepository
 
 
 class ChatMemory:
     def __init__(self, max_messages: int, evict_messages: int, conv_id: int=1, 
-                 persists: bool=True, summarize_func: function=None):
-        assert evict_messages < max_messages
+                 persists: bool=True, summarize_func: Callable[..., Any] | None =None):
+        assert evict_messages < max_messages, 'evict_messages must be < max_messages'
         self.max_messages = max_messages
         self.evict_messages = evict_messages
         self.conv_id = conv_id
@@ -22,9 +24,10 @@ class ChatMemory:
         if self.persists:
             result = self._chat_repo.add_message(self.conv_id, message)
             if result['error'] is not None:
+                self._messages.pop()
                 raise Exception(result['error'])
         
-        if len(self.messages) > self.max_messages:
+        if len(self._messages) > self.max_messages:
             if self.persists:
                 self._evict_messages()
             else: 
@@ -40,10 +43,10 @@ class ChatMemory:
         if self.summarize_func is not None:
             self.summarize_func(self._messages[:self.evict_messages])
         
-        result = self._chat_repo.evict_messages()
+        result = self._chat_repo.evict_messages(self.conv_id, self.evict_messages)
         if result['error'] is not None:
             raise Exception(result['error'])
-        self._messages = self._fetch_messages()
+        self._messages = self._messages[self.evict_messages:]
     
     def _fetch_messages(self) -> list[dict]:
         messages = []

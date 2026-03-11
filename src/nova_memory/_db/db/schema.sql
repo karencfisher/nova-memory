@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   deleted       INTEGER NOT NULL DEFAULT 0
 );
 
+INSERT INTO conversations (title) VALUES ('Default Conversation');
+
 CREATE TABLE IF NOT EXISTS messages (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
