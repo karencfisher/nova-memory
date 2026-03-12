@@ -18,7 +18,14 @@ class ChatMemory:
         self._chat_repo = ChatMemoryRepository
         self._messages = self._fetch_messages() if self.persists else []
         
-    def append(self, message: dict) -> None:
+    def add_message(self, message: dict) -> None:
+        if not message.get('role') or not message.get('content'):
+            raise KeyError('Message must contain \'role\' and \'content\' keys')
+        if not message['role'] in ['system', 'assistant', 'user', 'tool']:
+            raise ValueError(f'"{message['role']}" is invalid role')
+        
+        if isinstance(message['content'], dict):
+            message['content'] = json.dumps(message['content'])
         self._messages.append(message)
         
         if self.persists:

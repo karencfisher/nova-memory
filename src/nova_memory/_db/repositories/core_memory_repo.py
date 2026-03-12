@@ -7,15 +7,13 @@ class CoreMemoryRepository:
     dbn = NovaDB()
 
     @classmethod
-    def get_memories(cls, roles: list[str]=['user', 'agent']) -> dict:
+    def get_memories(cls) -> dict:
         sql = f'''
 SELECT id, role, key, value FROM core_memories
-WHERE role in ?
-      AND deleted = 0
+WHERE deleted = 0
 ORDER BY role, id;
 '''
-        params = (roles,)
-        return cls.dbn.execute_sql(sql, params, returns_data=True)
+        return cls.dbn.execute_sql(sql, returns_data=True)
 
     @classmethod
     def add_memory(cls, role: str, key: str, value: str) -> dict:
@@ -31,23 +29,23 @@ DO UPDATE SET
         return cls.dbn.execute_sql(sql, params)
     
     @classmethod
-    def delete(cls, id: int) -> dict:
+    def delete_memory(cls, role: str, key: str) -> dict:
         sql = f'''
 UPDATE core_memories
 SET deleted = 1
-WHERE id = ?;
+WHERE role = ? AND key = ?;
 '''
-        params = (id,)
+        params = (role, key)
         return cls.dbn.execute_sql(sql, params)
     
     @classmethod
-    def undelete(cls, id: int) -> dict:
+    def undelete_memory(cls, role: str, key: str) -> dict:
         sql = f'''
 UPDATE core_memories
 SET deleted = 0
-WHERE id = ?;
+WHERE role = ? AND key = ?;
 '''
-        params = (id,)
+        params = (role, key)
         return cls.dbn.execute_sql(sql, params)
     
     

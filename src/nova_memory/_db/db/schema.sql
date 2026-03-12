@@ -62,16 +62,3 @@ CREATE TABLE IF NOT EXISTS core_memories (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_core_memories_role_key
 ON core_memories(role, key);
 
-/* ---------------------------
-   Optional: tool/run log (debug flight recorder)
---------------------------- */
-CREATE TABLE IF NOT EXISTS tool_runs (
-  id              INTEGER PRIMARY KEY AUTOINCREMENT,
-  conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
-  tool_name       TEXT NOT NULL,
-  input_json      TEXT,
-  output_json     TEXT,
-  status          TEXT NOT NULL DEFAULT 'ok',
-  started_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
-  ended_at        TEXT
-);

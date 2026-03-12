@@ -22,12 +22,8 @@ AND evicted = 0;
 
     @classmethod
     def add_message(cls, conv_id: int, message: dict) -> dict:
-        try:
-            role = message['role']
-            content = message['content']
-        except KeyError:
-            return {'error': 'Invalid message', 'data': []}
-        
+        role = message['role']
+        content = message['content']
         if role == 'user' and isinstance(content, dict):
             try:
                 meta_json = json.dumps(content['metadata'])

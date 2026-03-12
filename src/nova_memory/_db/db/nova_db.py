@@ -11,7 +11,7 @@ class NovaDB:
         self.ext_path = importlib.resources.files("sqlite_vector.binaries") / "vector"
 
     @contextmanager
-    def _conn(self, use_vectors=False, distance='COSINE'):
+    def _conn(self, use_vectors: bool=False, distance: str='COSINE'):
         conn = sqlite3.connect(self.db_path)  # default check_same_thread=True is fine here
         try:
             conn.execute("PRAGMA foreign_keys = ON;")
@@ -37,8 +37,9 @@ class NovaDB:
         finally:
             conn.close()
 
-    def execute_sql(self, sql_batch, params=None, returns_data=False, 
-                    use_vectors=False, distance='COSINE'):
+    def execute_sql(self, sql_batch: str | list[str], params: tuple=None, 
+                    returns_data: bool=False, use_vectors: bool=False, 
+                    distance: str='COSINE') -> dict:
         if self.db_path is None:
             raise NotImplementedError('DB has not been initialized')
         if not isinstance(sql_batch, list):
@@ -61,11 +62,13 @@ class NovaDB:
             except Exception as err:
                 error = str(err)
                 CONN.rollback()
+                return {'error': error, 'data': []}
 
             if returns_data:
                 if len(sql_batch) > 1:
-                    raise ValueError('SELECT statements must be singular')
-                rows = result.fetchall()
-                data = [dict(row) for row in rows]
+                    error = 'SELECT statements must be singular'
+                else:
+                    rows = result.fetchall()
+                    data = [dict(row) for row in rows]
         return {'data': data, 'error': error}
     
