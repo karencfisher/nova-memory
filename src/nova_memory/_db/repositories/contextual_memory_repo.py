@@ -19,6 +19,11 @@ class ContextualMemoryRepository:
         cls.distance = distance
         from sentence_transformers import SentenceTransformer
         cls.embed_fn = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+        
+        sql = "SELECT vector_quantize('memory_items', 'embedding')"
+        result = cls.dbn.execute_sql(sql, use_vectors=True)
+        if result['error'] is not None:
+            raise Exception(f"Unable to initialize: {result['error']}")
     
     @classmethod
     def add_memory(cls, text: str, kind: str="note", source: str=None, meta: str=None) -> dict:
