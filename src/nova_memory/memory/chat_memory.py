@@ -24,6 +24,11 @@ class ChatMemory:
         if not message['role'] in ['system', 'assistant', 'user', 'tool']:
             raise ValueError(f'"{message['role']}" is invalid role')
         
+        if len(self._messages) >= self.max_messages:
+            if self.persists:
+                self._evict_messages()
+            self._messages = self._messages[self.evict_messages:]
+        
         if isinstance(message['content'], dict):
             message['content'] = json.dumps(message['content'])
         self._messages.append(message)
@@ -33,12 +38,6 @@ class ChatMemory:
             if result['error'] is not None:
                 self._messages.pop()
                 raise Exception(result['error'])
-        
-        if len(self._messages) > self.max_messages:
-            if self.persists:
-                self._evict_messages()
-            else: 
-                self._messages = self._messages[self.evict_messages:]
     
     def get_messages(self, filter: list=None) -> list[dict]:
         if filter is not None:
@@ -53,7 +52,6 @@ class ChatMemory:
         result = self._chat_repo.evict_messages(self.conv_id, self.evict_messages)
         if result['error'] is not None:
             raise Exception(result['error'])
-        self._messages = self._messages[self.evict_messages:]
     
     def _fetch_messages(self) -> list[dict]:
         messages = []
