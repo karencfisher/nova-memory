@@ -1,6 +1,7 @@
 import json
 from collections.abc import Callable
 from typing import Any
+from threading import Thread
 
 from .._db.repositories.chat_memory_repo import ChatMemoryRepository
 
@@ -47,7 +48,12 @@ class ChatMemory:
     
     def _evict_messages(self) -> None:
         if self.summarize_func is not None:
-            self.summarize_func(self._messages[:self.evict_messages])
+            summary_thread = Thread(
+                target=self.summarize_func, 
+                args=(self._messages[:self.evict_messages],),
+                daemon=True
+            )
+            summary_thread.start()
         
         result = self._chat_repo.evict_messages(self.conv_id, self.evict_messages)
         if result['error'] is not None:
