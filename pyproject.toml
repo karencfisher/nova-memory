@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nova-memory"
 version = "0.1.0"
-description = "Nova DB + repositories"
+description = "Nove memory for AI agents"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
