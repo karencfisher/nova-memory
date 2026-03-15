@@ -19,3 +19,9 @@ nova-init-db = "nova_memory._db.db.migrate:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"nova_memory._db.db" = ["schema.sql"]
