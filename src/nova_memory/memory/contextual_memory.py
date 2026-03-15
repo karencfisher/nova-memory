@@ -46,7 +46,7 @@ class ContextualMemory:
             if result['error'] is not None:
                 raise Exception(result['error'])
     
-    def query_memories(self, query: str, k: int = 5, kind: str = 'note') -> dict:
+    def query_memories(self, query: str, k: int = 5, kind: str = 'note') -> list[dict]:
         result = self._contextual_memory_repo.retrieve_memories(
             query, k=k, kind=kind
         )

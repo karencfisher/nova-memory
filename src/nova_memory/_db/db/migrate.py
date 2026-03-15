@@ -6,14 +6,13 @@ from ..util.db_path_config import write_db_path
 
 
 def migrate_db(db_path: str) -> None:
-    schema_path = files("nova_memory._db.db").joinpath("schema.sql")
+    schema_file = files("nova_memory._db.db").joinpath("schema.sql")
 
     try:
-        with open(schema_path, 'r') as FILE:
-            text = FILE.read()
-        statements = [statement.strip() for statement in text.split(';')]
+        text = schema_file.read_text(encoding="utf-8")
+        statements = [statement.strip() for statement in text.split(';') if statement.strip()]
     except FileNotFoundError:
-        print(f'Could not find DB')
+        print("Could not find DB schema.sql")
         exit()
 
     with sqlite3.Connection(db_path) as conn:
